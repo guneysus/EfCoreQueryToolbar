@@ -1,41 +1,97 @@
-<div style="position:fixed;bottom:0;left:0;width:100%;background:#333;color:#fff;z-index:9999;font-family:sans-serif;">
+<div id="toolbar"
+     style="position:fixed;bottom:0;left:0;width:100%;background:#333;color:#fff;z-index:9999;font-family:sans-serif;">
     <div style="display:flex;align-items:center;padding:5px;">
-        <button onclick="EfQueryLogToolbar.toggleToolbar()"
-            style="background:#555;color:#fff;border:none;padding:5px;border-radius:4px;cursor:pointer;">&#9660;</button>
-        <span style="margin-left:10px;">Debug Toolbar</span>
+        <button id="collapse-btn" onclick="EfCoreQueryToolbar.toggleToolbar()"
+                style="background:#555;color:#fff;border:none;padding:5px;border-radius:4px;cursor:pointer;">
+            &#9660;
+        </button>
+        <span style="margin-left:10px;">Query Toolbar</span>
     </div>
-    <div id="toolbar-content" style="display:none;padding:10px;background:#444;">
-        <p>Debug information goes here...</p>
+    <div id="debug-info" style="display:none; padding:10px; background:#444; overflow-y:auto; max-height:180px;scrollbar-width: thin;
+  ::-webkit-scrollbar {
+    width: 1px; /* Width of the scrollbar track */
+    height: auto; /* Height of the scrollbar thumb */
+    background-color: #888;
+    border-radius: 3px;
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 3px;
+    }
+  }">
         <ul>
-            <li>Query 1:
-                <pre>SELECT * FROM users</pre>
+            <li><pre>SELECT * FROM users</pre></li>
+            <li><pre>INSERT INTO orders</pre></li>
+            <li><pre>SELECT * FROM users WHERE email = 'john@example.com';</pre></li>
+            <li><pre>INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);</pre></li>
+            <li><pre>UPDATE customers SET address = 'New York' WHERE customer_id = 67890;</pre></li>
+            <li><pre>DELETE FROM products WHERE product_id = 23456;</pre></li>
+            <li>
+                <pre>SELECT order_id, user_id, SUM(quantity) as total_quantity
+FROM orders
+GROUP BY order_id, user_id;</pre>
             </li>
-            <li>Query 2:
-                <pre>INSERT INTO orders</pre>
-            </li>
-            <!-- Add more debug data here -->
+
         </ul>
     </div>
-
 </div>
-<script>
 
-    const EfQueryLogToolbar = (function () {
+<!-- Floating Bug Icon Button -->
+<button id="floating-btn" style="position:fixed;bottom:240px;left:20px;color:white;border:none;border-radius:50%;padding:15px;cursor:pointer;font-size:20px;box-shadow:0 4px 8px rgba(0, 0, 0, 0.1);">
+    &#128295; <!-- Wrench icon -->
+</button>
+
+<script>
+    const EfCoreQueryToolbar = (() => {
+        const toolbar = document.getElementById("toolbar");
+        const collapseBtn = document.getElementById("collapse-btn");
+        const debugInfo = document.getElementById("debug-info");
+        const floatingBtn = document.getElementById("floating-btn");
+
+        let isCollapsed = true;
+
+        const expand = () => {
+            toolbar.style.height = '200px';
+            debugInfo.style.display = 'block';
+            collapseBtn.innerHTML = '&#9650;';
+            isCollapsed = false;
+        };
+
+        const collapse = () => {
+            toolbar.style.height = '40px';
+            debugInfo.style.display = 'none';
+            collapseBtn.innerHTML = '&#9660;';
+            isCollapsed = true;
+        };
+
+        collapseBtn.addEventListener("click", () => {
+            if (isCollapsed) {
+                expand();
+            } else {
+                collapse();
+            }
+        });
+
+        floatingBtn.addEventListener("click", () => {
+            if (isCollapsed) {
+                expand();
+            } else {
+                collapse();
+            }
+        });
+
+
         function toggleToolbar() {
-            const content = document.getElementById('toolbar-content');
             const button = event.target;
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
+            if (debugInfo.style.display === 'none') {
+                debugInfo.style.display = 'block';
                 button.innerHTML = '&#9650;';
             } else {
-                content.style.display = 'none';
+                debugInfo.style.display = 'none';
                 button.innerHTML = '&#9660;';
             }
         }
-
-        return {
-            toggleToolbar
-        }
+        return { expand, collapse, toggleToolbar };
     })();
 
 </script>
