@@ -1,0 +1,41 @@
+<div style="position:fixed;bottom:0;left:0;width:100%;background:#333;color:#fff;z-index:9999;font-family:sans-serif;">
+    <div style="display:flex;align-items:center;padding:5px;">
+        <button onclick="EfQueryLogToolbar.toggleToolbar()"
+            style="background:#555;color:#fff;border:none;padding:5px;border-radius:4px;cursor:pointer;">&#9660;</button>
+        <span style="margin-left:10px;">Debug Toolbar</span>
+    </div>
+    <div id="toolbar-content" style="display:none;padding:10px;background:#444;">
+        <p>Debug information goes here...</p>
+        <ul>
+            <li>Query 1:
+                <pre>SELECT * FROM users</pre>
+            </li>
+            <li>Query 2:
+                <pre>INSERT INTO orders</pre>
+            </li>
+            <!-- Add more debug data here -->
+        </ul>
+    </div>
+
+</div>
+<script>
+
+    const EfQueryLogToolbar = (function () {
+        function toggleToolbar() {
+            const content = document.getElementById('toolbar-content');
+            const button = event.target;
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.innerHTML = '&#9650;';
+            } else {
+                content.style.display = 'none';
+                button.innerHTML = '&#9660;';
+            }
+        }
+
+        return {
+            toggleToolbar
+        }
+    })();
+
+</script>
