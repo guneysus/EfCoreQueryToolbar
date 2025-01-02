@@ -1,57 +1,278 @@
-<div id="toolbar"
-     style="position:fixed;bottom:0;left:0;width:100%;background:#333;color:#fff;z-index:9999;font-family:sans-serif;">
-    <div style="display:flex;align-items:center;padding:5px;">
-        <button id="collapse-btn" onclick="EfCoreQueryToolbar.toggleToolbar()"
-                style="background:#555;color:#fff;border:none;padding:5px;border-radius:4px;cursor:pointer;">
+<div id="toolbar">
+    <div id="toolbar-header">
+        <button id="collapse-btn">
             &#9660;
         </button>
-        <span style="margin-left:10px;">Query Toolbar</span>
-    </div>
-    <div id="debug-info" style="display:none; padding:10px; background:#444; overflow-y:auto; max-height:180px;scrollbar-width: thin;
-  ::-webkit-scrollbar {
-    width: 1px; /* Width of the scrollbar track */
-    height: auto; /* Height of the scrollbar thumb */
-    background-color: #888;
-    border-radius: 3px;
 
-    ::-webkit-scrollbar-thumb {
-      background-color: #555;
-      border-radius: 3px;
-    }
-  }">
+        <button id="clear-btn">
+            &#10006;
+        </button>
+        <span>Query Toolbar</span>
+    </div>
+    <div id="debug-info">
         <ul>
-            <li><pre>SELECT * FROM users</pre></li>
-            <li><pre>INSERT INTO orders</pre></li>
-            <li><pre>SELECT * FROM users WHERE email = 'john@example.com';</pre></li>
-            <li><pre>INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);</pre></li>
-            <li><pre>UPDATE customers SET address = 'New York' WHERE customer_id = 67890;</pre></li>
-            <li><pre>DELETE FROM products WHERE product_id = 23456;</pre></li>
-            <li>
+            <li class="query-item">
+                <pre>SELECT * FROM users</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO orders</pre>
+            </li>
+            <li class="query-item">
+                <pre>SELECT * FROM users WHERE email = 'john@example.com';</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);</pre>
+            </li>
+            <li class="query-item">
+                <pre>UPDATE customers SET address = 'New York' WHERE customer_id = 67890;</pre>
+            </li>
+            <li class="query-item">
+                <pre>DELETE FROM products WHERE product_id = 23456;</pre>
+            </li>
+            <li class="query-item">
                 <pre>SELECT order_id, user_id, SUM(quantity) as total_quantity
 FROM orders
 GROUP BY order_id, user_id;</pre>
             </li>
-
         </ul>
     </div>
 </div>
 
+
+<style>
+    #toolbar {
+        /* Box Model */
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        width: 100%;
+
+        /* Visual */
+        background: #333;
+        color: #fff;
+        z-index: 9999;
+
+        /* Typography */
+        font-family: sans-serif;
+
+        /* Animation */
+        transition: width 0.3s ease, height 0.3s ease;
+
+        #toolbar-header {
+            /* Box Model */
+            padding: 5px;
+
+            /* Layout */
+            align-items: center;
+            display: flex;
+
+            /* Interaction */
+            cursor: pointer;
+            font-weight: bold;
+            span {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    #collapse-btn {
+        /* Box Model */
+        border: none;
+        border-radius: 4px;
+        padding: 5px;
+
+        /* Visual */
+        background: #555;
+        color: #fff;
+
+        /* Interaction */
+        cursor: pointer;
+    }
+
+    #debug-info {
+        /* Box Model */
+        max-height: 500px;
+        padding: 10px;
+
+        /* Layout */
+        display: none;
+        overflow-y: auto;
+
+        /* Visual */
+        background: #444;
+        scrollbar-width: thin;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 4px;
+        }
+
+        .query-item {
+            padding: 1rem 0.5rem;
+            font-size: large;
+            &:hover {
+                background: rgb(85, 57, 8);
+                cursor: pointer;
+            }
+        }
+    }
+
+    #toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #333;
+        color: #fff;
+        z-index: 9999;
+        padding-bottom: 5px;
+        font-family: sans-serif;
+        transition: height 0.3s ease;
+
+        #toolbar-header {
+            
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            cursor: pointer;
+
+            span {
+                margin-left: 10px;
+            }
+
+            &:hover {
+                background: #666;
+            }
+        }
+    }
+
+    #collapse-btn,
+    #clear-btn {
+        background: #555;
+        color: #fff;
+        border: none;
+        padding: 5px;
+        margin: 0 5px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #clear-btn {
+
+        &:hover {
+            background: #666;
+            outline: 1px solid white;
+        }
+    }
+
+    #debug-info {
+        display: none;
+        padding: 10px;
+        background: #444;
+        overflow-y: auto;
+        /* max-height: 180px; */
+        scrollbar-width: thin;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #444;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #555;
+            border-radius: 4px;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    }
+
+
+    #floating-btn {
+
+        position: fixed;
+        top: 20px;
+        left: 20px;
+
+        border-radius: 50%;
+        border-width: 1.5px;
+        padding: 15px;
+        cursor: pointer;
+        font-size: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* background: #4CAF50; */
+        color: white;
+        transition: all 0.2s ease;
+
+        &:hover {
+            /* background-color: #45a049; */
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(1px);
+        }
+
+        .floating-btn-icon {
+            color: red;
+        }
+    }
+</style>
+
 <!-- Floating Bug Icon Button -->
-<button id="floating-btn" style="position:fixed;bottom:240px;left:20px;color:white;border:none;border-radius:50%;padding:15px;cursor:pointer;font-size:20px;box-shadow:0 4px 8px rgba(0, 0, 0, 0.1);">
-    &#128295; <!-- Wrench icon -->
+<button id="floating-btn">
+    <div class="floating-btn-icon">&#128295; <!-- Wrench icon --></div>
 </button>
 
 <script>
     const EfCoreQueryToolbar = (() => {
         const toolbar = document.getElementById("toolbar");
+        const header = document.getElementById("toolbar-header");
         const collapseBtn = document.getElementById("collapse-btn");
         const debugInfo = document.getElementById("debug-info");
         const floatingBtn = document.getElementById("floating-btn");
+        const clearBtn = document.getElementById("clear-btn");
+        const debugList = debugInfo.querySelector("ul");
+
+        const clearDebugInfo = () => {
+            debugList.innerHTML = '';
+        };
+
+        // Clear button event listener
+        clearBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            clearDebugInfo();
+        });
 
         let isCollapsed = true;
 
         const expand = () => {
-            toolbar.style.height = '200px';
+            toolbar.style.height = '400px';
             debugInfo.style.display = 'block';
             collapseBtn.innerHTML = '&#9650;';
             isCollapsed = false;
@@ -64,34 +285,15 @@ GROUP BY order_id, user_id;</pre>
             isCollapsed = true;
         };
 
-        collapseBtn.addEventListener("click", () => {
-            if (isCollapsed) {
-                expand();
-            } else {
-                collapse();
-            }
-        });
+        const toggle = () => {
+            isCollapsed ? expand() : collapse();
+        };
 
-        floatingBtn.addEventListener("click", () => {
-            if (isCollapsed) {
-                expand();
-            } else {
-                collapse();
-            }
-        });
+        // Event listeners
+        header.addEventListener("click", toggle); // Header click toggles toolbar
+        // collapseBtn.addEventListener("click", toggle); // Collapse button toggles
+        floatingBtn.addEventListener("click", toggle); // Floating button toggles
 
-
-        function toggleToolbar() {
-            const button = event.target;
-            if (debugInfo.style.display === 'none') {
-                debugInfo.style.display = 'block';
-                button.innerHTML = '&#9650;';
-            } else {
-                debugInfo.style.display = 'none';
-                button.innerHTML = '&#9660;';
-            }
-        }
-        return { expand, collapse, toggleToolbar };
+        return { expand, collapse, toggle };
     })();
-
 </script>
