@@ -34,6 +34,38 @@
 FROM orders
 GROUP BY order_id, user_id;</pre>
             </li>
+
+            <li class="query-item">
+                <pre>SELECT p.product_name, c.category_name, p.price
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.price > 100
+ORDER BY p.price DESC;</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO customers (first_name, last_name, email, phone)
+VALUES ('Sarah', 'Johnson', 'sarah.j@email.com', '555-0123');</pre>
+            </li>
+            <li class="query-item">
+                <pre>SELECT o.order_id, c.customer_name, 
+       SUM(oi.quantity * p.price) as total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.id 
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+GROUP BY o.order_id, c.customer_name
+HAVING total_amount > 1000;</pre>
+            </li>
+            <li class="query-item">
+                <pre>UPDATE inventory
+SET stock_level = stock_level - 5,
+    last_updated = CURRENT_TIMESTAMP
+WHERE product_id IN (
+    SELECT product_id 
+    FROM products 
+    WHERE category = 'Electronics'
+);</pre>
+            </li>
         </ul>
     </div>
 </div>
@@ -41,6 +73,10 @@ GROUP BY order_id, user_id;</pre>
 
 <style>
     #toolbar {
+
+        /* Initial state */
+        height: 40px;
+        display: block;
         /* Box Model */
         bottom: 0;
         left: 0;
@@ -242,6 +278,22 @@ GROUP BY order_id, user_id;</pre>
             color: red;
         }
     }
+
+    .query-meta {
+        font-size: 0.8em;
+        color: #aaa;
+        margin-top: 5px;
+    }
+
+    .query-meta span {
+        margin-right: 15px;
+    }
+
+    .error {
+        color: #ff6b6b;
+        padding: 10px;
+        text-align: center;
+    }
 </style>
 
 <!-- Floating Bug Icon Button -->
@@ -259,24 +311,132 @@ GROUP BY order_id, user_id;</pre>
         const clearBtn = document.getElementById("clear-btn");
         const debugList = debugInfo.querySelector("ul");
 
+        // Mock API response
+        const mockQueryData = {
+            queries: [
+                {
+                    id: 1,
+                    sql: "SELECT * FROM users",
+                    duration: "120ms"
+                },
+                {
+                    id: 2,
+                    sql: "INSERT INTO orders",
+                    duration: "85ms"
+                },
+                {
+                    id: 3,
+                    sql: "SELECT * FROM users WHERE email = 'john@example.com';",
+                    duration: "95ms"
+                },
+                {
+                    id: 4,
+                    sql: "INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);",
+                    duration: "110ms"
+                },
+                {
+                    id: 5,
+                    sql: "UPDATE customers SET address = 'New York' WHERE customer_id = 67890;",
+                    duration: "75ms"
+                },
+                {
+                    id: 6,
+                    sql: "DELETE FROM products WHERE product_id = 23456;",
+                    duration: "65ms"
+                },
+                {
+                    id: 7,
+                    sql: `SELECT order_id, user_id, SUM(quantity) as total_quantity
+FROM orders
+GROUP BY order_id, user_id;`,
+                    duration: "180ms"
+                },
+                {
+                    id: 8,
+                    sql: `SELECT p.product_name, c.category_name, p.price
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.price > 100
+ORDER BY p.price DESC;`,
+                    duration: "200ms"
+                },
+                {
+                    id: 9,
+                    sql: `INSERT INTO customers (first_name, last_name, email, phone)
+VALUES ('Sarah', 'Johnson', 'sarah.j@email.com', '555-0123');`,
+                    duration: "90ms"
+                },
+                {
+                    id: 10,
+                    sql: `SELECT o.order_id, c.customer_name, 
+       SUM(oi.quantity * p.price) as total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.id 
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+GROUP BY o.order_id, c.customer_name
+HAVING total_amount > 1000;`,
+                    duration: "250ms"
+                },
+                {
+                    id: 11,
+                    sql: `UPDATE inventory
+SET stock_level = stock_level - 5,
+    last_updated = CURRENT_TIMESTAMP
+WHERE product_id IN (
+    SELECT product_id 
+    FROM products 
+    WHERE category = 'Electronics'
+);`,
+                    duration: "150ms"
+                }
+            ]
+        };
+
+        // Mock API call function
+        const fetchQueryData = () => {
+            return new Promise((resolve) => {
+                // Simulate network delay
+                setTimeout(() => {
+                    resolve(mockQueryData);
+                }, 100);
+            });
+        };
+
+        // Render query items
+        const renderQueries = (queries) => {
+            debugList.innerHTML = queries.map(query => `
+                <li class="query-item">
+                    <pre>${query.sql}</pre>
+                    <div class="query-meta">
+                        <span class="duration">${query.duration}</span>
+                    </div>
+                </li>
+            `).join('');
+        };
+
         const clearDebugInfo = () => {
             debugList.innerHTML = '';
         };
 
-        // Clear button event listener
-        clearBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent header click from triggering
-            clearDebugInfo();
-        });
-
-        let isCollapsed = true;
-
-        const expand = () => {
+        // Load queries when expanding
+        const expand = async () => {
             toolbar.style.height = '400px';
             debugInfo.style.display = 'block';
             collapseBtn.innerHTML = '&#9650;';
             isCollapsed = false;
+
+            // Fetch and render queries
+            try {
+                const data = await fetchQueryData();
+                renderQueries(data.queries);
+            } catch (error) {
+                console.error('Error fetching queries:', error);
+                debugList.innerHTML = '<li class="error">Error loading queries</li>';
+            }
         };
+
+        let isCollapsed = true;
 
         const collapse = () => {
             toolbar.style.height = '40px';
