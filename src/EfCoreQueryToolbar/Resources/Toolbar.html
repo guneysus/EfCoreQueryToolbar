@@ -272,7 +272,8 @@ WHERE product_id IN (
         transform-origin: center;
 
         /* Content Alignment */
-        display: flex;
+        /* display: flex; */
+        display: none;
         align-items: center;
         justify-content: center;
 
@@ -356,6 +357,50 @@ WHERE product_id IN (
             transform: rotate(360deg);
         }
     }
+
+    .query-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 5px;
+
+        pre {
+            flex: 1;  /* Allow query text to take remaining space */
+        }
+    }
+
+    .query-count {
+        color: #888;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #444;
+        border-radius: 3px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .execution-count {
+        color: #aaa;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #3a3a3a;
+        border-radius: 3px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .duration-percentage {
+        color: #888;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #3a3a3a;
+        border-radius: 3px;
+        min-width: 50px;
+        text-align: center;
+    }
 </style>
 
 <!-- Floating Bug Icon Button -->
@@ -380,39 +425,46 @@ WHERE product_id IN (
                 {
                     id: 1,
                     sql: "SELECT * FROM users",
-                    duration: "120ms"
+                    p95: "120ms",
+                    count: 15
                 },
                 {
                     id: 2,
                     sql: "INSERT INTO orders",
-                    duration: "85ms"
+                    p95: "85ms",
+                    count: 5
                 },
                 {
                     id: 3,
                     sql: "SELECT * FROM users WHERE email = 'john@example.com';",
-                    duration: "95ms"
+                    p95: "95ms",
+                    count: 8
                 },
                 {
                     id: 4,
                     sql: "INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);",
-                    duration: "110ms"
+                    p95: "110ms",
+                    count: 7
                 },
                 {
                     id: 5,
                     sql: "UPDATE customers SET address = 'New York' WHERE customer_id = 67890;",
-                    duration: "75ms"
+                    p95: "75ms",
+                    count: 10
                 },
                 {
                     id: 6,
                     sql: "DELETE FROM products WHERE product_id = 23456;",
-                    duration: "65ms"
+                    p95: "65ms",
+                    count: 3
                 },
                 {
                     id: 7,
                     sql: `SELECT order_id, user_id, SUM(quantity) as total_quantity
 FROM orders
 GROUP BY order_id, user_id;`,
-                    duration: "180ms"
+                    p95: "180ms",
+                    count: 12
                 },
                 {
                     id: 8,
@@ -421,13 +473,15 @@ FROM products p
 JOIN categories c ON p.category_id = c.id
 WHERE p.price > 100
 ORDER BY p.price DESC;`,
-                    duration: "200ms"
+                    p95: "200ms",
+                    count: 9
                 },
                 {
                     id: 9,
                     sql: `INSERT INTO customers (first_name, last_name, email, phone)
 VALUES ('Sarah', 'Johnson', 'sarah.j@email.com', '555-0123');`,
-                    duration: "90ms"
+                    p95: "90ms",
+                    count: 6
                 },
                 {
                     id: 10,
@@ -439,7 +493,8 @@ JOIN order_items oi ON o.order_id = oi.order_id
 JOIN products p ON oi.product_id = p.id
 GROUP BY o.order_id, c.customer_name
 HAVING total_amount > 1000;`,
-                    duration: "250ms"
+                    p95: "250ms",
+                    count: 15
                 },
                 {
                     id: 11,
@@ -451,7 +506,8 @@ WHERE product_id IN (
     FROM products 
     WHERE category = 'Electronics'
 );`,
-                    duration: "150ms"
+                    p95: "150ms",
+                    count: 8
                 }
             ]
         };
@@ -468,32 +524,44 @@ WHERE product_id IN (
 
         // Add this function to calculate color based on percentage
         const getDurationColor = (percentage) => {
-            if (percentage < 25) return '#4CAF50';      // Green
-            if (percentage < 50) return '#FFC107';      // Yellow
-            if (percentage < 75) return '#FF9800';      // Orange
+            if (percentage < 40) return '#4CAF50';      // Green for more queries
+            if (percentage < 60) return '#FFC107';      // Yellow
+            if (percentage < 80) return '#FF9800';      // Orange
             return '#F44336';                           // Red
         };
 
-        // Modify the renderQueries function
+        // Modify the renderQueries function to remove "p95:" prefix
         const renderQueries = (queries) => {
-            // Sort queries by duration (descending)
             const sortedQueries = [...queries].sort((a, b) => {
-                const aDuration = parseInt(a.duration.replace('ms', ''));
-                const bDuration = parseInt(b.duration.replace('ms', ''));
-                return bDuration - aDuration;
+                const aP95 = parseInt(a.p95.replace('ms', ''));
+                const bP95 = parseInt(b.p95.replace('ms', ''));
+                return bP95 - aP95;
             });
 
-            // Find the maximum duration for percentage calculation
-            const maxDuration = parseInt(sortedQueries[0].duration.replace('ms', ''));
+            // Calculate total duration (p95 * count for each query)
+            const totalDuration = sortedQueries.reduce((sum, query) => {
+                return sum + (parseInt(query.p95.replace('ms', '')) * query.count);
+            }, 0);
 
-            debugList.innerHTML = sortedQueries.map(query => {
-                const durationMs = parseInt(query.duration.replace('ms', ''));
-                const percentage = (durationMs / maxDuration) * 100;
+            const maxP95 = parseInt(sortedQueries[0].p95.replace('ms', ''));
+
+            debugList.innerHTML = sortedQueries.map((query, index) => {
+                const p95Ms = parseInt(query.p95.replace('ms', ''));
+                const percentage = (p95Ms / maxP95) * 100;
                 const color = getDurationColor(percentage);
+
+                // Calculate this query's percentage of total duration
+                const queryTotalDuration = p95Ms * query.count;
+                const durationPercentage = ((queryTotalDuration / totalDuration) * 100).toFixed(1);
 
                 return `
                     <li class="query-item">
-                        <pre>${query.sql}</pre>
+                        <div class="query-header">
+                            <span class="query-count">#${index + 1}</span>
+                            <span class="execution-count">${query.count}×</span>
+                            <span class="duration-percentage">${durationPercentage}%</span>
+                            <pre>${query.sql}</pre>
+                        </div>
                         <div class="query-meta">
                             <div class="duration-bar">
                                 <div class="fill" style="
@@ -501,7 +569,7 @@ WHERE product_id IN (
                                     background-color: ${color};
                                 "></div>
                             </div>
-                            <span class="duration-text">${query.duration}</span>
+                            <span class="duration-text">${query.p95}</span>
                         </div>
                     </li>
                 `;

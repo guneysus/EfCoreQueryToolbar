@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -125,31 +126,18 @@ public static class AspnetCoreExtensions
             select m);
 
         patch("CommandReaderExecuted", nameof(Hooks.CommandReaderExecuted), diagLoggerMethods, h);
-        patch("CommandScalarExecuted", nameof(Hooks.CommandScalarExecuted), diagLoggerMethods, h);
-        patch("CommandNonQueryExecuted", nameof(Hooks.CommandNonQueryExecuted), diagLoggerMethods, h);
         patch("CommandReaderExecutedAsync", nameof(Hooks.CommandReaderExecutedAsync), diagLoggerMethods, h);
+
+        patch("CommandScalarExecuted", nameof(Hooks.CommandScalarExecuted), diagLoggerMethods, h);
         patch("CommandScalarExecutedAsync", nameof(Hooks.CommandScalarExecutedAsync), diagLoggerMethods, h);
+
+        patch("CommandNonQueryExecuted", nameof(Hooks.CommandNonQueryExecuted), diagLoggerMethods, h);
         patch("CommandNonQueryExecutedAsync", nameof(Hooks.CommandNonQueryExecutedAsync), diagLoggerMethods, h);
 
         var relationCommandType = efCoreRelationalTypes.Single(x => x.Name == "RelationalCommand");
         var methods = relationCommandType.GetMethods(AccessTools.all);
 
-        patch("ExecuteReader", methods, h,
-            prefix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPrefix))),
-            postfix: new HarmonyMethod(typeof(Hooks).GetMethod(nameof(Hooks.ExecuteReaderPostfix))));
         return _;
-    }
-
-
-    private static void patch(string name, IEnumerable<MethodInfo> methods, Harmony harmony, HarmonyMethod prefix, HarmonyMethod postfix)
-    {
-        var method = (
-            from m in methods
-            where m.Name == name
-            select m).Single();
-
-        var replacement = harmony.Patch(method, prefix: prefix, postfix: postfix);
-        ArgumentNullException.ThrowIfNull(replacement);
     }
 
     private static void patch(string name, string hookName, IEnumerable<MethodInfo> methods, Harmony harmony)
@@ -255,7 +243,8 @@ namespace EfCoreQueryToolbar
 
         public static void Add(Metric metric)
         {
-            EfCoreMetrics.GetInstance().Add(metric);
+            EfCoreMetrics instance = EfCoreMetrics.GetInstance();
+            instance.Add(metric);
         }
 
         internal static IResult HtmlResult(EfCoreMetrics metrics)
@@ -301,8 +290,8 @@ namespace EfCoreQueryToolbar
 
     public struct Metric
     {
-        public double Duration { get; set; }
-        public string Query { get; set; }
+        public double Duration { get; internal set; }
+        public string Query { get; internal set; }
 
 #if ENABLE_PARAMETERS_DICT
     public IDictionary<string, object?> Parameters { get; set; }
@@ -311,12 +300,6 @@ namespace EfCoreQueryToolbar
 
     public static class Hooks
     {
-        public static void ExecuteReaderPrefix(object __instance, object [] __args, out Stopwatch __state)
-        {
-            __state = new Stopwatch();
-            __state.Start();
-        }
-
         public static void CommandReaderExecuted(object [] __args, TimeSpan duration, object command) => processLog(duration, command);
 
         public static void CommandScalarExecuted(TimeSpan duration, object command) => processLog(duration, command);
@@ -329,7 +312,7 @@ namespace EfCoreQueryToolbar
 
         public static void CommandNonQueryExecutedAsync(TimeSpan duration, object command) => processLog(duration, command);
 
-        private static void processLog(TimeSpan duration, object command)
+        private static void processLog(TimeSpan duration, object command, [CallerMemberName] string source = default)
         {
             Type type = command.GetType();
             PropertyInfo? cmdTextProp = type.GetProperty("CommandText");
@@ -352,6 +335,10 @@ namespace EfCoreQueryToolbar
 
             var ms = duration.TotalMilliseconds;
 
+            Trace.WriteLine($@"
+Query: {cmdText} 
+Source: {source}");
+            
             var metric = new Metric
             {
                 Duration = ms,
@@ -363,62 +350,7 @@ namespace EfCoreQueryToolbar
 
             QueryLog.Add(metric);
         }
-
-        public static void ExecuteReaderPostfix(object __instance,
-            object [] __args,
-            Stopwatch __state)
-        {
-            __state.Stop();
-
-            if (__instance == null || __instance.GetType().Name != "RelationalCommand")
-                return;
-
-            Type type = __instance.GetType();
-            PropertyInfo? cmdTextProp = type.GetProperty("CommandText");
-
-            if (cmdTextProp == null)
-                return;
-            var cmdText = cmdTextProp.GetValue(__instance) as string;
-
-#if ENABLE_PARAMETERS_DICT
-        IDictionary<string, object?>? parameterValuesDict = default;
-
-        if (__args != null && __args.Length > 0)
-        {
-            var parameters = __args[0];
-            Type parameterValuesType = parameters.GetType();
-            if (parameterValuesType is IDictionary<string, object?>)
-            {
-                PropertyInfo? parameterValuesProp = parameterValuesType.GetProperty("ParameterValues");
-                if (parameterValuesProp != null)
-                {
-                    object? parameterValue = parameterValuesProp.GetValue(parameters);
-                    parameterValuesDict = parameterValue as IDictionary<string, object?>;
-                }
-            }
-        } 
-#endif
-
-            if (cmdText == null)
-#if DEBUG
-                throw new ArgumentNullException(nameof(cmdText));
-#else
-            return; 
-#endif
-
-            var metric = new Metric
-            {
-                Duration = __state.Elapsed.TotalMilliseconds,
-                Query = cmdText,
-#if ENABLE_PARAMETERS_DICT
-                Parameters = parameterValuesDict 
-#endif
-            };
-
-            QueryLog.Add(metric);
-        }
     }
-
 
 
     internal static class EmbeddedResourceHelpers
