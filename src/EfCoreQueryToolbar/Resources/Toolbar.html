@@ -7,6 +7,11 @@
         <button id="clear-btn">
             &#10006;
         </button>
+
+        <button id="refresh-btn">
+            &#8635;
+        </button>
+
         <span>Query Toolbar</span>
     </div>
     <div id="debug-info">
@@ -73,91 +78,6 @@ WHERE product_id IN (
 
 <style>
     #toolbar {
-
-        /* Initial state */
-        height: 40px;
-        display: block;
-        /* Box Model */
-        bottom: 0;
-        left: 0;
-        position: fixed;
-        width: 100%;
-
-        /* Visual */
-        background: #333;
-        color: #fff;
-        z-index: 9999;
-
-        /* Typography */
-        font-family: sans-serif;
-
-        /* Animation */
-        transition: width 0.3s ease, height 0.3s ease;
-
-        #toolbar-header {
-            /* Box Model */
-            padding: 5px;
-
-            /* Layout */
-            align-items: center;
-            display: flex;
-
-            /* Interaction */
-            cursor: pointer;
-            font-weight: bold;
-            span {
-                margin-left: 10px;
-            }
-        }
-    }
-
-    #collapse-btn {
-        /* Box Model */
-        border: none;
-        border-radius: 4px;
-        padding: 5px;
-
-        /* Visual */
-        background: #555;
-        color: #fff;
-
-        /* Interaction */
-        cursor: pointer;
-    }
-
-    #debug-info {
-        /* Box Model */
-        max-height: 500px;
-        padding: 10px;
-
-        /* Layout */
-        display: none;
-        overflow-y: auto;
-
-        /* Visual */
-        background: #444;
-        scrollbar-width: thin;
-
-        &::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: #666;
-            border-radius: 4px;
-        }
-
-        .query-item {
-            padding: 1rem 0.5rem;
-            font-size: large;
-            &:hover {
-                background: rgb(85, 57, 8);
-                cursor: pointer;
-            }
-        }
-    }
-
-    #toolbar {
         position: fixed;
         bottom: 0;
         left: 0;
@@ -168,9 +88,99 @@ WHERE product_id IN (
         padding-bottom: 5px;
         font-family: sans-serif;
         transition: height 0.3s ease;
+        height: 40px; /* Add initial height */
+
+        #debug-info {
+
+            /* Box Model */
+            max-height: 450px;
+            padding: 10px;
+            padding-bottom: 20px;
+
+            /* Layout */
+            display: none;
+            overflow-y: auto;
+
+            /* Visual */
+            background: #444;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #666;
+                border-radius: 4px;
+            }
+
+            .query-item {
+                padding: 1rem 0.5rem;
+                font-size: large;
+
+                &:hover {
+                    background: rgb(85, 57, 8);
+                    cursor: pointer;
+                }
+            }
+
+            li {
+                margin-bottom: 10px;
+                padding: 8px;
+                background: #555;
+                border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            pre {
+                margin: 0;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-family: monospace;
+                max-width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+
+            display: none;
+            background: #444;
+            overflow-y: auto;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #666;
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: #444;
+            }
+
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            li {
+                padding: 8px;
+                background: #555;
+                border-radius: 4px;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                font-family: monospace;
+            }
+        }
 
         #toolbar-header {
-            
+
             display: flex;
             align-items: center;
             padding: 5px;
@@ -187,95 +197,108 @@ WHERE product_id IN (
     }
 
     #collapse-btn,
+    #refresh-btn,
     #clear-btn {
+        /* Box Model */
+        border: none;
+        border-radius: 4px;
+        padding: 5px 8px;
+        margin: 0 5px;
+
+        /* Visual */
         background: #555;
         color: #fff;
-        border: none;
-        padding: 5px;
-        margin: 0 5px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
 
-    #clear-btn {
+        /* Interaction */
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        /* Typography */
+        font-size: 14px;
+        line-height: 1;
 
         &:hover {
             background: #666;
             outline: 1px solid white;
         }
-    }
-
-    #debug-info {
-        display: none;
-        padding: 10px;
-        background: #444;
-        overflow-y: auto;
-        /* max-height: 180px; */
-        scrollbar-width: thin;
-
-        &::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: #666;
-            border-radius: 4px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: #444;
-        }
-
-        ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        li {
-            margin-bottom: 10px;
-            padding: 8px;
-            background: #555;
-            border-radius: 4px;
-        }
-
-        pre {
-            margin: 0;
-            white-space: pre-wrap;
-            font-family: monospace;
-        }
-    }
-
-
-    #floating-btn {
-
-        position: fixed;
-        top: 20px;
-        left: 20px;
-
-        border-radius: 50%;
-        border-width: 1.5px;
-        padding: 15px;
-        cursor: pointer;
-        font-size: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        /* background: #4CAF50; */
-        color: white;
-        transition: all 0.2s ease;
-
-        &:hover {
-            /* background-color: #45a049; */
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-            transform: translateY(-2px);
-        }
 
         &:active {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background: #444;
+            transform: translateY(1px);
+        }
+    }
+
+
+    #refresh-btn {
+
+        &:active {
+            background: #444;
             transform: translateY(1px);
         }
 
+        &.rotating {
+            animation: rotate 1s linear;
+        }
+    }
+
+
+
+    #floating-btn {
+        /* Position */
+        position: fixed;
+        bottom: 45px;
+        /* Closer to toolbar */
+        right: 10px;
+        /* Closer to edge */
+        z-index: 9999;
+
+        /* Box Model */
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 15px;
+        padding: 0;
+
+        /* Visual */
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+
+        /* Interaction */
+        cursor: pointer;
+        /* Added pointer cursor */
+
+        /* Animation */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
+
+        /* Content Alignment */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        &:active {
+            transform: translateY(1px) scale(0.95);
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
         .floating-btn-icon {
-            color: red;
+            /* Icon Style */
+            color: white;
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+
+            /* Animation */
+            transition: transform 0.2s ease;
+        }
+
+        &:hover .floating-btn-icon {
+            transform: rotate(-15deg);
         }
     }
 
@@ -283,6 +306,10 @@ WHERE product_id IN (
         font-size: 0.8em;
         color: #aaa;
         margin-top: 5px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .query-meta span {
@@ -293,6 +320,41 @@ WHERE product_id IN (
         color: #ff6b6b;
         padding: 10px;
         text-align: center;
+    }
+
+    .duration-bar {
+        width: 200px;
+        height: 8px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .duration-bar .fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .duration-text {
+        display: inline-block;
+        vertical-align: middle;
+        font-family: monospace;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 </style>
 
@@ -310,6 +372,7 @@ WHERE product_id IN (
         const floatingBtn = document.getElementById("floating-btn");
         const clearBtn = document.getElementById("clear-btn");
         const debugList = debugInfo.querySelector("ul");
+        const refreshBtn = document.getElementById("refresh-btn");
 
         // Mock API response
         const mockQueryData = {
@@ -403,16 +466,46 @@ WHERE product_id IN (
             });
         };
 
-        // Render query items
+        // Add this function to calculate color based on percentage
+        const getDurationColor = (percentage) => {
+            if (percentage < 25) return '#4CAF50';      // Green
+            if (percentage < 50) return '#FFC107';      // Yellow
+            if (percentage < 75) return '#FF9800';      // Orange
+            return '#F44336';                           // Red
+        };
+
+        // Modify the renderQueries function
         const renderQueries = (queries) => {
-            debugList.innerHTML = queries.map(query => `
-                <li class="query-item">
-                    <pre>${query.sql}</pre>
-                    <div class="query-meta">
-                        <span class="duration">${query.duration}</span>
-                    </div>
-                </li>
-            `).join('');
+            // Sort queries by duration (descending)
+            const sortedQueries = [...queries].sort((a, b) => {
+                const aDuration = parseInt(a.duration.replace('ms', ''));
+                const bDuration = parseInt(b.duration.replace('ms', ''));
+                return bDuration - aDuration;
+            });
+
+            // Find the maximum duration for percentage calculation
+            const maxDuration = parseInt(sortedQueries[0].duration.replace('ms', ''));
+
+            debugList.innerHTML = sortedQueries.map(query => {
+                const durationMs = parseInt(query.duration.replace('ms', ''));
+                const percentage = (durationMs / maxDuration) * 100;
+                const color = getDurationColor(percentage);
+
+                return `
+                    <li class="query-item">
+                        <pre>${query.sql}</pre>
+                        <div class="query-meta">
+                            <div class="duration-bar">
+                                <div class="fill" style="
+                                    width: ${percentage}%; 
+                                    background-color: ${color};
+                                "></div>
+                            </div>
+                            <span class="duration-text">${query.duration}</span>
+                        </div>
+                    </li>
+                `;
+            }).join('');
         };
 
         const clearDebugInfo = () => {
@@ -453,7 +546,31 @@ WHERE product_id IN (
         header.addEventListener("click", toggle); // Header click toggles toolbar
         // collapseBtn.addEventListener("click", toggle); // Collapse button toggles
         floatingBtn.addEventListener("click", toggle); // Floating button toggles
+        clearBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            clearDebugInfo();
+        });
 
-        return { expand, collapse, toggle };
+        const refreshQueries = async () => {
+            try {
+                refreshBtn.classList.add('rotating');
+                const data = await fetchQueryData();
+                renderQueries(data.queries);
+            } catch (error) {
+                console.error('Error fetching queries:', error);
+                debugList.innerHTML = '<li class="error">Error loading queries</li>';
+            } finally {
+                setTimeout(() => {
+                    refreshBtn.classList.remove('rotating');
+                }, 1000);
+            }
+        };
+
+        refreshBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            refreshQueries();
+        });
+
+        return { expand, collapse, toggle, refreshQueries };
     })();
 </script>

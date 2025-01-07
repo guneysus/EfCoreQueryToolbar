@@ -5,6 +5,7 @@
         <OutputType>Library</OutputType>
         <Description>Lorem ipsum</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,8 +14,13 @@
         <PackageReference Include="System.Text.Json" Version="8.0.*" />
     </ItemGroup>
 
+
     <ItemGroup>
         <EmbeddedResource Include="Resources\Toolbar.html">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+
+        <EmbeddedResource Include="Resources\Page.html">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
