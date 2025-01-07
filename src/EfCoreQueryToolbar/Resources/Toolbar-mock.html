@@ -1,0 +1,644 @@
+<div id="toolbar">
+    <div id="toolbar-header">
+        <button id="collapse-btn">
+            &#9660;
+        </button>
+
+        <button id="clear-btn">
+            &#10006;
+        </button>
+
+        <button id="refresh-btn">
+            &#8635;
+        </button>
+
+        <span>Query Toolbar</span>
+    </div>
+    <div id="debug-info">
+        <ul>
+            <li class="query-item">
+                <pre>SELECT * FROM users</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO orders</pre>
+            </li>
+            <li class="query-item">
+                <pre>SELECT * FROM users WHERE email = 'john@example.com';</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);</pre>
+            </li>
+            <li class="query-item">
+                <pre>UPDATE customers SET address = 'New York' WHERE customer_id = 67890;</pre>
+            </li>
+            <li class="query-item">
+                <pre>DELETE FROM products WHERE product_id = 23456;</pre>
+            </li>
+            <li class="query-item">
+                <pre>SELECT order_id, user_id, SUM(quantity) as total_quantity
+FROM orders
+GROUP BY order_id, user_id;</pre>
+            </li>
+
+            <li class="query-item">
+                <pre>SELECT p.product_name, c.category_name, p.price
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.price > 100
+ORDER BY p.price DESC;</pre>
+            </li>
+            <li class="query-item">
+                <pre>INSERT INTO customers (first_name, last_name, email, phone)
+VALUES ('Sarah', 'Johnson', 'sarah.j@email.com', '555-0123');</pre>
+            </li>
+            <li class="query-item">
+                <pre>SELECT o.order_id, c.customer_name, 
+       SUM(oi.quantity * p.price) as total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.id 
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+GROUP BY o.order_id, c.customer_name
+HAVING total_amount > 1000;</pre>
+            </li>
+            <li class="query-item">
+                <pre>UPDATE inventory
+SET stock_level = stock_level - 5,
+    last_updated = CURRENT_TIMESTAMP
+WHERE product_id IN (
+    SELECT product_id 
+    FROM products 
+    WHERE category = 'Electronics'
+);</pre>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<style>
+    #toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #333;
+        color: #fff;
+        z-index: 9999;
+        padding-bottom: 5px;
+        font-family: sans-serif;
+        transition: height 0.3s ease;
+        height: 40px; /* Add initial height */
+
+        #debug-info {
+
+            /* Box Model */
+            max-height: 450px;
+            padding: 10px;
+            padding-bottom: 20px;
+
+            /* Layout */
+            display: none;
+            overflow-y: auto;
+
+            /* Visual */
+            background: #444;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #666;
+                border-radius: 4px;
+            }
+
+            .query-item {
+                padding: 1rem 0.5rem;
+                font-size: large;
+
+                &:hover {
+                    background: rgb(85, 57, 8);
+                    cursor: pointer;
+                }
+            }
+
+            li {
+                margin-bottom: 10px;
+                padding: 8px;
+                background: #555;
+                border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            pre {
+                margin: 0;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-family: monospace;
+                max-width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+
+            display: none;
+            background: #444;
+            overflow-y: auto;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #666;
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: #444;
+            }
+
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            li {
+                padding: 8px;
+                background: #555;
+                border-radius: 4px;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                font-family: monospace;
+            }
+        }
+
+        #toolbar-header {
+
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            cursor: pointer;
+
+            span {
+                margin-left: 10px;
+            }
+
+            &:hover {
+                background: #666;
+            }
+        }
+    }
+
+    #collapse-btn,
+    #refresh-btn,
+    #clear-btn {
+        /* Box Model */
+        border: none;
+        border-radius: 4px;
+        padding: 5px 8px;
+        margin: 0 5px;
+
+        /* Visual */
+        background: #555;
+        color: #fff;
+
+        /* Interaction */
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        /* Typography */
+        font-size: 14px;
+        line-height: 1;
+
+        &:hover {
+            background: #666;
+            outline: 1px solid white;
+        }
+
+        &:active {
+            background: #444;
+            transform: translateY(1px);
+        }
+    }
+
+
+    #refresh-btn {
+
+        &:active {
+            background: #444;
+            transform: translateY(1px);
+        }
+
+        &.rotating {
+            animation: rotate 1s linear;
+        }
+    }
+
+
+
+    #floating-btn {
+        /* Position */
+        position: fixed;
+        bottom: 45px;
+        /* Closer to toolbar */
+        right: 10px;
+        /* Closer to edge */
+        z-index: 9999;
+
+        /* Box Model */
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 15px;
+        padding: 0;
+
+        /* Visual */
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+
+        /* Interaction */
+        cursor: pointer;
+        /* Added pointer cursor */
+
+        /* Animation */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
+
+        /* Content Alignment */
+        /* display: flex; */
+        display: none;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        &:active {
+            transform: translateY(1px) scale(0.95);
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .floating-btn-icon {
+            /* Icon Style */
+            color: white;
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+
+            /* Animation */
+            transition: transform 0.2s ease;
+        }
+
+        &:hover .floating-btn-icon {
+            transform: rotate(-15deg);
+        }
+    }
+
+    .query-meta {
+        font-size: 0.8em;
+        color: #aaa;
+        margin-top: 5px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .query-meta span {
+        margin-right: 15px;
+    }
+
+    .error {
+        color: #ff6b6b;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .duration-bar {
+        width: 200px;
+        height: 8px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .duration-bar .fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .duration-text {
+        display: inline-block;
+        vertical-align: middle;
+        font-family: monospace;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .query-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 5px;
+
+        pre {
+            flex: 1;  /* Allow query text to take remaining space */
+        }
+    }
+
+    .query-count {
+        color: #888;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #444;
+        border-radius: 3px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .execution-count {
+        color: #aaa;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #3a3a3a;
+        border-radius: 3px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .duration-percentage {
+        color: #888;
+        font-family: monospace;
+        font-size: 0.9em;
+        padding: 2px 4px;
+        background: #3a3a3a;
+        border-radius: 3px;
+        min-width: 50px;
+        text-align: center;
+    }
+</style>
+
+<!-- Floating Bug Icon Button -->
+<button id="floating-btn">
+    <div class="floating-btn-icon">&#128295; <!-- Wrench icon --></div>
+</button>
+
+<script>
+    const EfCoreQueryToolbar = (() => {
+        const toolbar = document.getElementById("toolbar");
+        const header = document.getElementById("toolbar-header");
+        const collapseBtn = document.getElementById("collapse-btn");
+        const debugInfo = document.getElementById("debug-info");
+        const floatingBtn = document.getElementById("floating-btn");
+        const clearBtn = document.getElementById("clear-btn");
+        const debugList = debugInfo.querySelector("ul");
+        const refreshBtn = document.getElementById("refresh-btn");
+
+        // Mock API response
+        const mockQueryData = {
+            queries: [
+                {
+                    id: 1,
+                    sql: "SELECT * FROM users",
+                    p95: "120ms",
+                    count: 15
+                },
+                {
+                    id: 2,
+                    sql: "INSERT INTO orders",
+                    p95: "85ms",
+                    count: 5
+                },
+                {
+                    id: 3,
+                    sql: "SELECT * FROM users WHERE email = 'john@example.com';",
+                    p95: "95ms",
+                    count: 8
+                },
+                {
+                    id: 4,
+                    sql: "INSERT INTO orders (order_id, user_id, product_name, quantity) VALUES ('101', 12345, 'Laptop', 1);",
+                    p95: "110ms",
+                    count: 7
+                },
+                {
+                    id: 5,
+                    sql: "UPDATE customers SET address = 'New York' WHERE customer_id = 67890;",
+                    p95: "75ms",
+                    count: 10
+                },
+                {
+                    id: 6,
+                    sql: "DELETE FROM products WHERE product_id = 23456;",
+                    p95: "65ms",
+                    count: 3
+                },
+                {
+                    id: 7,
+                    sql: `SELECT order_id, user_id, SUM(quantity) as total_quantity
+FROM orders
+GROUP BY order_id, user_id;`,
+                    p95: "180ms",
+                    count: 12
+                },
+                {
+                    id: 8,
+                    sql: `SELECT p.product_name, c.category_name, p.price
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.price > 100
+ORDER BY p.price DESC;`,
+                    p95: "200ms",
+                    count: 9
+                },
+                {
+                    id: 9,
+                    sql: `INSERT INTO customers (first_name, last_name, email, phone)
+VALUES ('Sarah', 'Johnson', 'sarah.j@email.com', '555-0123');`,
+                    p95: "90ms",
+                    count: 6
+                },
+                {
+                    id: 10,
+                    sql: `SELECT o.order_id, c.customer_name, 
+       SUM(oi.quantity * p.price) as total_amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.id 
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+GROUP BY o.order_id, c.customer_name
+HAVING total_amount > 1000;`,
+                    p95: "250ms",
+                    count: 15
+                },
+                {
+                    id: 11,
+                    sql: `UPDATE inventory
+SET stock_level = stock_level - 5,
+    last_updated = CURRENT_TIMESTAMP
+WHERE product_id IN (
+    SELECT product_id 
+    FROM products 
+    WHERE category = 'Electronics'
+);`,
+                    p95: "150ms",
+                    count: 8
+                }
+            ]
+        };
+
+        // Mock API call function
+        const fetchQueryData = () => {
+            return new Promise((resolve) => {
+                // Simulate network delay
+                setTimeout(() => {
+                    resolve(mockQueryData);
+                }, 100);
+            });
+        };
+
+        // Add this function to calculate color based on percentage
+        const getDurationColor = (percentage) => {
+            if (percentage < 40) return '#4CAF50';      // Green for more queries
+            if (percentage < 60) return '#FFC107';      // Yellow
+            if (percentage < 80) return '#FF9800';      // Orange
+            return '#F44336';                           // Red
+        };
+
+        // Modify the renderQueries function to remove "p95:" prefix
+        const renderQueries = (queries) => {
+            const sortedQueries = [...queries].sort((a, b) => {
+                const aP95 = parseInt(a.p95.replace('ms', ''));
+                const bP95 = parseInt(b.p95.replace('ms', ''));
+                return bP95 - aP95;
+            });
+
+            // Calculate total duration (p95 * count for each query)
+            const totalDuration = sortedQueries.reduce((sum, query) => {
+                return sum + (parseInt(query.p95.replace('ms', '')) * query.count);
+            }, 0);
+
+            const maxP95 = parseInt(sortedQueries[0].p95.replace('ms', ''));
+
+            debugList.innerHTML = sortedQueries.map((query, index) => {
+                const p95Ms = parseInt(query.p95.replace('ms', ''));
+                const percentage = (p95Ms / maxP95) * 100;
+                const color = getDurationColor(percentage);
+
+                // Calculate this query's percentage of total duration
+                const queryTotalDuration = p95Ms * query.count;
+                const durationPercentage = ((queryTotalDuration / totalDuration) * 100).toFixed(1);
+
+                return `
+                    <li class="query-item">
+                        <div class="query-header">
+                            <span class="query-count">#${index + 1}</span>
+                            <span class="execution-count">${query.count}×</span>
+                            <span class="duration-percentage">${durationPercentage}%</span>
+                            <pre>${query.sql}</pre>
+                        </div>
+                        <div class="query-meta">
+                            <div class="duration-bar">
+                                <div class="fill" style="
+                                    width: ${percentage}%; 
+                                    background-color: ${color};
+                                "></div>
+                            </div>
+                            <span class="duration-text">${query.p95}</span>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        const clearDebugInfo = () => {
+            debugList.innerHTML = '';
+        };
+
+        // Load queries when expanding
+        const expand = async () => {
+            toolbar.style.height = '400px';
+            debugInfo.style.display = 'block';
+            collapseBtn.innerHTML = '&#9650;';
+            isCollapsed = false;
+
+            // Fetch and render queries
+            try {
+                const data = await fetchQueryData();
+                renderQueries(data.queries);
+            } catch (error) {
+                console.error('Error fetching queries:', error);
+                debugList.innerHTML = '<li class="error">Error loading queries</li>';
+            }
+        };
+
+        let isCollapsed = true;
+
+        const collapse = () => {
+            toolbar.style.height = '40px';
+            debugInfo.style.display = 'none';
+            collapseBtn.innerHTML = '&#9660;';
+            isCollapsed = true;
+        };
+
+        const toggle = () => {
+            isCollapsed ? expand() : collapse();
+        };
+
+        // Event listeners
+        header.addEventListener("click", toggle); // Header click toggles toolbar
+        // collapseBtn.addEventListener("click", toggle); // Collapse button toggles
+        floatingBtn.addEventListener("click", toggle); // Floating button toggles
+        clearBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            clearDebugInfo();
+        });
+
+        const refreshQueries = async () => {
+            try {
+                refreshBtn.classList.add('rotating');
+                const data = await fetchQueryData();
+                renderQueries(data.queries);
+            } catch (error) {
+                console.error('Error fetching queries:', error);
+                debugList.innerHTML = '<li class="error">Error loading queries</li>';
+            } finally {
+                setTimeout(() => {
+                    refreshBtn.classList.remove('rotating');
+                }, 1000);
+            }
+        };
+
+        refreshBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            refreshQueries();
+        });
+
+        return { expand, collapse, toggle, refreshQueries };
+    })();
+</script>
