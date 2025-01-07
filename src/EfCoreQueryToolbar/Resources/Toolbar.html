@@ -400,6 +400,7 @@ WHERE product_id IN (
         border-radius: 3px;
         min-width: 50px;
         text-align: center;
+        font-weight: bold;  /* Make percentage more prominent */
     }
 </style>
 
@@ -442,6 +443,14 @@ WHERE product_id IN (
             return '#F44336';                           // Red
         };
 
+        // Add this function to calculate color for percentage values
+        const getPercentageColor = (percentage) => {
+            if (percentage < 10) return '#4CAF50';      // Green for < 10%
+            if (percentage < 25) return '#FFC107';      // Yellow for 10-25%
+            if (percentage < 50) return '#FF9800';      // Orange for 25-50%
+            return '#F44336';                           // Red for > 50%
+        };
+
         // Modify renderQueries to handle new data structure
         const renderQueries = (data) => {
             const queries = data.summaries.map((item, index) => ({
@@ -472,13 +481,14 @@ WHERE product_id IN (
                 // Calculate this query's percentage of total duration
                 const queryTotalDuration = p95Ms * query.count;
                 const durationPercentage = ((queryTotalDuration / totalDuration) * 100).toFixed(1);
+                const percentageColor = getPercentageColor(parseFloat(durationPercentage));
 
                 return `
                     <li class="query-item">
                         <div class="query-header">
                             <span class="query-count">#${index + 1}</span>
                             <span class="execution-count">${query.count}×</span>
-                            <span class="duration-percentage">${durationPercentage}%</span>
+                            <span class="duration-percentage" style="color: ${percentageColor}">${durationPercentage}%</span>
                             <pre>${query.sql}</pre>
                         </div>
                         <div class="query-meta">
@@ -556,6 +566,35 @@ WHERE product_id IN (
         refreshBtn.addEventListener("click", (e) => {
             e.stopPropagation(); // Prevent header click from triggering
             refreshQueries();
+        });
+
+        // Add clearQueries function
+        const clearQueries = async () => {
+            try {
+                // Make DELETE request to /query-log
+                const response = await fetch('/query-log', {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to clear queries');
+                }
+
+                // Refresh queries after successful clear
+                await refreshQueries();
+            } catch (error) {
+                console.error('Error clearing queries:', error);
+                debugList.innerHTML = '<li class="error">Error clearing queries</li>';
+            }
+        };
+
+        // Update clear button event listener
+        clearBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent header click from triggering
+            clearQueries();
         });
 
         return { expand, collapse, toggle, refreshQueries };

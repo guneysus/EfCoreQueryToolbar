@@ -43,7 +43,6 @@ namespace Microsoft.Extensions.DependencyInjection
             return app;
         }
 
-
         static WebApplication configureProfilerPage(this WebApplication app, string route)
         {
             if (_routeConfigured) return app;
@@ -84,7 +83,6 @@ namespace Microsoft.Extensions.DependencyInjection
         }
     }
 }
-
 
 public static class AspnetCoreExtensions
 {
@@ -145,7 +143,6 @@ public static class AspnetCoreExtensions
         var replacement = harmony.Patch(methods.Single(x => x.Name == name), new HarmonyMethod(typeof(Hooks).GetMethod(name)));
         ArgumentNullException.ThrowIfNull(replacement);
     }
-
 
 }
 
@@ -287,7 +284,6 @@ namespace EfCoreQueryToolbar
         public double P95 { get; set; }
     }
 
-
     public struct Metric
     {
         public double Duration { get; internal set; }
@@ -351,7 +347,6 @@ Source: {source}");
             QueryLog.Add(metric);
         }
     }
-
 
     internal static class EmbeddedResourceHelpers
     {
