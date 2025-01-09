@@ -5,7 +5,7 @@ Intercepts SQL queries from Entity Framework Core and shows them in an HTML tool
 
 ![demo](./docs/img/chrome_pccq6Bj6AK.gif)
 
-## Compatability
+## Compatibility
 
 Any Entity Framework Core version that supports Interceptor should work.
 
