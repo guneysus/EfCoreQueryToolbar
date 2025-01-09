@@ -3,7 +3,7 @@
 
 Intercepts SQL queries from Entity Framework Core and shows them in an HTML toolbar within your web app.
 
-![demo](./docs/img/o7pFwwSw8t.gif)
+![demo](./docs/img/chrome_pccq6Bj6AK.gif)
 
 ## Compatability
 
